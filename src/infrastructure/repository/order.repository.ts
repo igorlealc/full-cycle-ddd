@@ -80,8 +80,6 @@ export default class OrderRepository implements OrderRepositoryInterface {
   }
 
   mapOrderFrom(model: OrderModel): Order {  
-    console.log('json = '+model.items); 
-    console.log('json = '+model.items.length);
     let order = new Order(model.id, model.customer_id, model.items.map(this.mapOrderItemFrom.bind(this)));
     return order;
   }
