@@ -1,3 +1,9 @@
+import EventDispatcher from "../event/@shared/event-dispatcher";
+import CustomerAddressChangedEvent from "../event/customer/customer-address-changed.event";
+import CustomerCreatedEvent from "../event/customer/customer-created.event";
+import ConsoleLogWhenAddressIsChangedHandler from "../event/customer/handler/console-log-when-address-is-changed-handler";
+import ConsoleLogWhenCustomeIsCreated1Handler from "../event/customer/handler/console-log-when-custome-Is-created-1.handler";
+import ConsoleLogWhenCustomeIsCreated2Handler from "../event/customer/handler/console-log-when-custome-Is-created-2.handler";
 import Address from "./address";
 
 export default class Customer {
@@ -6,11 +12,17 @@ export default class Customer {
   private _address!: Address;
   private _active: boolean = false;
   private _rewardPoints: number = 0;
+  private _eventDispatcher: EventDispatcher = new EventDispatcher();
 
   constructor(id: String, name: String) {
+    this._configureDomainEvents();
     this._id = id;
     this._name = name;
-    this.validate();
+    this.validate();    
+    this._eventDispatcher.notify(new CustomerCreatedEvent({
+      id: id,
+      name: name      
+    }));
   }
 
   get id(): String {
@@ -45,6 +57,11 @@ export default class Customer {
   
   changeAddress(address: Address) {
     this._address = address;
+    this._eventDispatcher.notify(new CustomerAddressChangedEvent({
+      clientId: this.id,
+      clientName: this.name ,
+      address: address.toString()
+    }));
   }
 
   isActive(): boolean {
@@ -68,5 +85,11 @@ export default class Customer {
 
   set Address(address: Address) {
     this._address = address;
+  }
+
+  _configureDomainEvents(){
+    this._eventDispatcher.register("CustomerCreatedEvent", new ConsoleLogWhenCustomeIsCreated1Handler());
+    this._eventDispatcher.register("CustomerCreatedEvent", new ConsoleLogWhenCustomeIsCreated2Handler());
+    this._eventDispatcher.register("CustomerAddressChangedEvent", new ConsoleLogWhenAddressIsChangedHandler());
   }
 }
